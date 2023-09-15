@@ -10,9 +10,36 @@ public static class TaskExtensions
     /// <typeparam name="TIn">Value type</typeparam>
     /// <param name="source">Source task</param>
     /// <param name="function">Function to be applied to the task</param>
+    /// <returns><![CDATA[New task of Result<Unit>]]></returns>
+    public static async Task<Result<Unit>> Then<TIn>(this Task<Result<TIn>> source,
+                                                     Func<TIn, Task> function)
+    {
+        try
+        {
+            var res = await source;
+            if (res.HasError)
+                return res.GetError();
+            
+            await function(res.GetValueOrElse(default));
+            return Unit.Create();
+        }
+        catch (Exception ex)
+        {
+            return new Error(ex.Message, ex);
+        }
+    }
+
+    /// <summary>
+    /// <![CDATA[
+    /// Chaining a task of Result<T>.
+    /// ]]>
+    /// </summary>
+    /// <typeparam name="TIn">Value type</typeparam>
+    /// <param name="source">Source task</param>
+    /// <param name="function">Function to be applied to the task</param>
     /// <returns><![CDATA[New task of Result<T>]]></returns>
     public static async Task<Result<TOut>> Then<TIn, TOut>(this Task<Result<TIn>> source,
-                                                Func<TIn, Task<Result<TOut>>> function)
+                                                           Func<TIn, Task<TOut>> function)
     {
         try
         {
@@ -23,6 +50,45 @@ public static class TaskExtensions
         {
             return new Error(ex.Message, ex);
         }
+    }
+
+    /// <summary>
+    /// <![CDATA[
+    /// Chaining a task of Result<T>.
+    /// ]]>
+    /// </summary>
+    /// <typeparam name="TIn">Value type</typeparam>
+    /// <param name="source">Source task</param>
+    /// <param name="function">Function to be applied to the task</param>
+    /// <returns><![CDATA[New task of Result<T>]]></returns>
+    public static async Task<Result<TOut>> Then<TIn, TOut>(this Task<Result<TIn>> source,
+                                                           Func<TIn, Task<Result<TOut>>> function)
+    {
+        try
+        {
+            var res = await source;
+            return res.HasError ? res.GetError() : await function(res.GetValueOrElse(default));
+        }
+        catch (Exception ex)
+        {
+            return new Error(ex.Message, ex);
+        }
+    }
+
+    /// <summary>
+    /// Result pattern match
+    /// </summary>
+    /// <typeparam name="TOut">Return type</typeparam>
+    /// <param name="some">Executed when contains value</param>
+    /// <param name="none">Executed when not contains value</param>
+    /// <param name="error">Executed when has error</param>
+    /// <returns>Result of T</returns>
+    public static async Task<TOut> Match<TIn, TOut>(this Task<Result<TIn>> source,
+                                                    Func<TIn, TOut> some, 
+                                                    Func<TOut> none, 
+                                                    Func<Error, TOut> error)
+    {
+        return (await source).Match(some, none, error);
     }
 
     /// <summary>

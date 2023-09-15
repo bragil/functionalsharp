@@ -7,34 +7,33 @@ namespace Tests;
 public class MaybeTests
 {
     [Test]
-    public void Deve_HasValue_como_false()
+    public void Should_HasValue_be_false()
     {
-        string valorNulo = null;
-        Maybe<string> maybe = valorNulo;
-
+        string nullValue = null;
+        Maybe<string> maybe = nullValue;
         maybe.HasValue.ShouldBeFalse();
     }
 
     [Test]
-    public void Deve_HasValue_como_true()
+    public void Should_HasValue_be_true()
     {
-        string valor = "teste";
-        Maybe<string> maybe = valor;
+        string value = "test";
+        Maybe<string> maybe = value;
 
         maybe.HasValue.ShouldBeTrue();
     }
 
     [Test]
-    public void Deve_alterar_valor_na_pipeline()
+    public void Should_change_value_after_Then()
     {
-        Maybe<string> maybe = "teste";
+        Maybe<string> maybe = "test";
         var novo = maybe.Then(s => s.ToUpper()).GetValueOrElse("");
 
-        novo.ShouldBe("TESTE");
+        novo.ShouldBe("TEST");
     }
 
     [Test]
-    public void Deve_receber_maybe_na_pipeline()
+    public void Should_change_value_after_Then_with_Maybe()
     {
         Maybe<int> intMaybe = 99;
         Maybe<string> maybe = "teste";
@@ -46,7 +45,7 @@ public class MaybeTests
     }
 
     [Test]
-    public void Deve_fazer_pattern_match_do_resultado()
+    public void Should_do_correct_pattern_matching()
     {
         string valorNulo = null;
         Maybe<string> maybe1 = valorNulo;

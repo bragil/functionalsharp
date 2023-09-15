@@ -3,7 +3,7 @@
 internal static class Utils
 {
     public static bool HasValue<T>(T value)
-        => !EqualityComparer<T>.Default.Equals(value, default);
+        => value is Unit || !EqualityComparer<T>.Default.Equals(value, default);
 
     public static bool HasError(Error error)
         => !EqualityComparer<Error>.Default.Equals(error, default);

@@ -1,5 +1,9 @@
 ﻿namespace FunctionalSharp;
 
+/// <summary>
+/// Result Monad.
+/// </summary>
+/// <typeparam name="TValue">Value type</typeparam>
 public readonly struct Result<TValue>
 {
     private readonly Maybe<TValue> value;
@@ -233,4 +237,33 @@ public static class Result
 {
     public static Result<T> Of<T>(T value)
         => value;
+}
+
+public static class ResultExtensions
+{
+    public static Result<C> SelectMany<A, B, C>(this Result<A> monad,
+                                                 Func<A, Result<B>> function,
+                                                 Func<A, B, C> projection)
+            => monad.Then(outer => function(outer)
+                    .Then(inner => projection(outer, inner)));
+
+    public static Result<A> Select<A, B, C>(this Result<C> first, Func<C, A> map)
+        => first.Then(map);
+
+
+    public static Result<TOut> Select<TIn, TOut>(this Result<TIn> ma, Func<TIn, TOut> f)
+    {
+        if (ma.HasError)
+            return ma.GetError();
+
+        return Utils.TryCatch(() => f(ma.GetValueOrElse(default)));
+    }
+
+    public static Result<TOut> SelectMany<TIn, TOut>(this Result<TIn> ma, Func<TIn, Result<TOut>> f)
+    {
+        if (ma.HasError)
+            return ma.GetError();
+
+        return Utils.TryCatch(() => f(ma.GetValueOrElse(default)));
+    }
 }
