@@ -237,11 +237,11 @@ public class ResultTests
         return "without error";
     }
 
-    private async Task<Result<string>> AsyncResultWithNone()
-    {
-        string nullValue = null;
-        return await Task.FromResult(nullValue);
-    }
+    ////private async Task<Result<string>> AsyncResultWithNone()
+    ////{
+    ////    string nullValue = null;
+    ////    return await Task.FromResult(nullValue);
+    ////}
 
     private Result<string> ResultWithNone()
     {

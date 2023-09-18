@@ -5,5 +5,5 @@
 /// </summary>
 public struct None
 {
-    public static None Create() => new None();
+    public static None Create() => new();
 }

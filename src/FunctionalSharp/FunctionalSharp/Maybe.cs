@@ -12,7 +12,7 @@ public readonly struct Maybe<TValue>
     internal Maybe(TValue value)
         => this.value = value;
 
-    internal Maybe(None _) 
+    internal Maybe(None _)
         => value = default;
 
     internal TValue GetValue() => value;
@@ -41,6 +41,20 @@ public readonly struct Maybe<TValue>
     public Maybe<T> Then<T>(Func<TValue, Maybe<T>> function)
             => HasValue ? function(value) : default;
 
+    /// <summary>
+    /// Provides execution chaining.
+    /// </summary>
+    /// <param name="function">Function to be applied to the value</param>
+    /// <returns>Unit</returns>
+    public Maybe<Unit> Then(Action<TValue> function)
+            => HasValue ? Execute(function) : default;
+
+    private Unit Execute(Action<TValue> function)
+    {
+        function(value);
+        return Unit.Create();
+    }
+
 
     public static implicit operator Maybe<TValue>(TValue value)
             => new(value);
@@ -52,6 +66,9 @@ public readonly struct Maybe<TValue>
 public static class Maybe
 {
     public static Maybe<T> Of<T>(T value) => new Maybe<T>(value);
+
+    public static Maybe<T> Of<T>(T? nullable) where T : struct
+        => nullable ?? default;
 
     public static Maybe<T> Empty<T>()
         => new Maybe<T>(None.Create());

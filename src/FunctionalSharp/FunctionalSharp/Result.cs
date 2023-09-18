@@ -201,7 +201,6 @@ public readonly struct Result<TValue>
         }
     }
 
-
     /// <summary>
     /// Implicit cast operator for return with value.
     /// </summary>
@@ -229,7 +228,7 @@ public readonly struct Result<TValue>
     /// <param name="maybe">Objeto Opt[TValue]</param>
     public static implicit operator Result<TValue>(Maybe<TValue> maybe)
         => maybe.HasValue 
-            ? maybe.GetValueOrElse(default) 
+            ? new Result<TValue>(maybe.GetValue()) 
             : new Result<TValue>(None.Create());
 }
 
@@ -237,6 +236,9 @@ public static class Result
 {
     public static Result<T> Of<T>(T value)
         => value;
+
+    public static Result<T> Of<T>(T? nullable) where T : struct
+        => nullable ?? default;
 }
 
 public static class ResultExtensions

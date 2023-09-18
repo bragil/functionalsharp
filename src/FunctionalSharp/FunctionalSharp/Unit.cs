@@ -1,9 +1,9 @@
 ﻿namespace FunctionalSharp;
 
 /// <summary>
-/// Replace for result without value
+/// Replace for result without value.
 /// </summary>
 public struct Unit
 {
-    public static Unit Create() => new Unit();
+    public static Unit Create() => new();
 }
