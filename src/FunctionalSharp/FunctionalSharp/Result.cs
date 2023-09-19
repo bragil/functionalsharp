@@ -1,4 +1,6 @@
-﻿namespace FunctionalSharp;
+﻿using static FunctionalSharp.FnUtils;
+
+namespace FunctionalSharp;
 
 /// <summary>
 /// Result Monad.
@@ -9,7 +11,7 @@ public readonly struct Result<TValue>
     private readonly Maybe<TValue> value;
     private readonly Error error;
     public readonly bool HasValue => value.HasValue;
-    public readonly bool HasError => Utils.HasError(error);
+    public readonly bool HasError => HasError(error);
 
     internal Result(TValue value)
     {
@@ -83,7 +85,7 @@ public readonly struct Result<TValue>
         => (HasError, HasValue) switch
         {
             (true, _) => error,
-            (false, true) => Try(function),
+            (false, true) => Try(GetValue(), function),
             (false, false) => None.Create()
         };
 
@@ -91,7 +93,7 @@ public readonly struct Result<TValue>
         => (HasError, HasValue) switch
         {
             (true, _) => error,
-            (false, true) => Try(function),
+            (false, true) => Try(GetValue(), function),
             (false, false) => None.Create()
         };
 
@@ -99,7 +101,7 @@ public readonly struct Result<TValue>
         => (HasError, HasValue) switch
         {
             (true, _) => error,
-            (false, true) => Try(function),
+            (false, true) => Try(GetValue(), function),
             (false, false) => None.Create()
         };
 
@@ -107,7 +109,7 @@ public readonly struct Result<TValue>
         => (HasError, HasValue) switch
         {
             (true, _) => error,
-            (false, true) => await TryAsync(function),
+            (false, true) => await TryAsync(GetValue(), function),
             (false, false) => None.Create()
         };
 
@@ -115,7 +117,7 @@ public readonly struct Result<TValue>
         => (HasError, HasValue) switch
         {
             (true, _) => error,
-            (false, true) => await TryAsync(function),
+            (false, true) => await TryAsync(GetValue(), function),
             (false, false) => None.Create()
         };
 
@@ -123,104 +125,30 @@ public readonly struct Result<TValue>
         => (HasError, HasValue) switch
         {
             (true, _) => error,
-            (false, true) => await TryAsync(function),
+            (false, true) => await TryAsync(GetValue(), function),
             (false, false) => None.Create()
         };
-
-    private Result<Unit> Try(Action<TValue> function)
-    {
-        try
-        {
-            function(value.GetValueOrElse(default));
-            return new Result<Unit>(Unit.Create());
-        }
-        catch (Exception ex)
-        {
-            return new Error(ex.Message, ex);
-        }
-    }
-
-    private Result<T> Try<T>(Func<TValue, T> function)
-    {
-        try
-        {
-            return function(value.GetValueOrElse(default));
-        }
-        catch (Exception ex)
-        {
-            return new Error(ex.Message, ex);
-        }
-    }
-
-    private Result<T> Try<T>(Func<TValue, Result<T>> function)
-    {
-        try
-        {
-            return function(value.GetValueOrElse(default));
-        }
-        catch (Exception ex)
-        {
-            return new Error(ex.Message, ex);
-        }
-    }
-
-    private async Task<Result<Unit>> TryAsync(Func<TValue, Task> function)
-    {
-        try
-        {
-            await function(value.GetValueOrElse(default));
-            return Unit.Create();
-        }
-        catch (Exception ex)
-        {
-            return new Error(ex.Message, ex);
-        }
-    }
-
-    private async Task<Result<T>> TryAsync<T>(Func<TValue, Task<T>> function)
-    {
-        try
-        {
-            return await function(value.GetValueOrElse(default));
-        }
-        catch (Exception ex)
-        {
-            return new Error(ex.Message, ex);
-        }
-    }
-
-    private async Task<Result<T>> TryAsync<T>(Func<TValue, Task<Result<T>>> function)
-    {
-        try
-        {
-            return await function(value.GetValueOrElse(default));
-        }
-        catch (Exception ex)
-        {
-            return new Error(ex.Message, ex);
-        }
-    }
 
     /// <summary>
     /// Implicit cast operator for return with value.
     /// </summary>
     /// <param name="theValue">Value</param>
     public static implicit operator Result<TValue>(TValue theValue)
-        => new Result<TValue>(theValue);
+        => new(theValue);
 
     /// <summary>
     /// Implicit cast operator for error.
     /// </summary>
     /// <param name="error">Error</param>
     public static implicit operator Result<TValue>(Error error)
-        => new Result<TValue>(error);
+        => new(error);
 
     /// <summary>
     /// Operador de cast implícito para None (nenhum valor).
     /// </summary>
     /// <param name="none">Objeto None</param>
     public static implicit operator Result<TValue>(None none)
-        => new Result<TValue>(none);
+        => new(none);
 
     /// <summary>
     /// Operador de cast implícito para Opt[TValue].
@@ -258,7 +186,7 @@ public static class ResultExtensions
         if (ma.HasError)
             return ma.GetError();
 
-        return Utils.TryCatch(() => f(ma.GetValueOrElse(default)));
+        return Try(ma.GetValueOrElse(default), f);
     }
 
     public static Result<TOut> SelectMany<TIn, TOut>(this Result<TIn> ma, Func<TIn, Result<TOut>> f)
@@ -266,6 +194,6 @@ public static class ResultExtensions
         if (ma.HasError)
             return ma.GetError();
 
-        return Utils.TryCatch(() => f(ma.GetValueOrElse(default)));
+        return Try(ma.GetValueOrElse(default), f);
     }
 }

@@ -202,6 +202,27 @@ public class ResultTests
         value.ShouldBe("error");
     }
 
+    [Test]
+    public void Should_execute_function_OnError()
+    {
+        Result<string> stringResult = new Error("error");
+        stringResult.OnError(err => err.Message.ShouldBe("error"));
+    }
+
+    [Test]
+    public void Should_execute_function_OnSomeValue()
+    {
+        Result<string> stringResult = "test";
+        stringResult.OnSomeValue(s => s.ShouldBe("test"));
+    }
+
+    [Test]
+    public void Should_execute_function_OnNoneValue()
+    {
+        Result<string> stringResult = default;
+        stringResult.OnNoneValue(() => Assert.Pass());
+    }
+
     private async Task AsyncNoReturn()
     {
         await Task.CompletedTask;

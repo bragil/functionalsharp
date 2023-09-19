@@ -7,7 +7,7 @@
 public readonly struct Maybe<TValue>
 {
     private readonly TValue value;
-    public readonly bool HasValue => Utils.HasValue(value);
+    public readonly bool HasValue => FnUtils.HasValue(value);
 
     internal Maybe(TValue value)
         => this.value = value;
@@ -65,11 +65,12 @@ public readonly struct Maybe<TValue>
 
 public static class Maybe
 {
-    public static Maybe<T> Of<T>(T value) => new Maybe<T>(value);
+    public static Maybe<T> Of<T>(T value) 
+        => new(value);
 
     public static Maybe<T> Of<T>(T? nullable) where T : struct
         => nullable ?? default;
 
     public static Maybe<T> Empty<T>()
-        => new Maybe<T>(None.Create());
+        => new(None.Create());
 }
