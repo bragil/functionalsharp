@@ -74,3 +74,26 @@ public static class Maybe
     public static Maybe<T> Empty<T>()
         => new(None.Create());
 }
+
+public static class MaybeExtensions
+{
+    public static Maybe<C> SelectMany<A, B, C>(this Maybe<A> monad,
+                                                 Func<A, Maybe<B>> function,
+                                                 Func<A, B, C> projection)
+            => monad.Then(outer => function(outer)
+                    .Then(inner => projection(outer, inner)));
+
+    public static Maybe<A> Select<A, B, C>(this Maybe<C> first, Func<C, A> map)
+        => first.Then(map);
+
+
+    public static Maybe<TOut> Select<TIn, TOut>(this Maybe<TIn> ma, Func<TIn, TOut> f)
+    {
+        return f(ma.GetValueOrElse(default));
+    }
+
+    public static Maybe<TOut> SelectMany<TIn, TOut>(this Maybe<TIn> ma, Func<TIn, Maybe<TOut>> f)
+    {
+        return f(ma.GetValueOrElse(default));
+    }
+}
